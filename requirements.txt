@@ -1,0 +1,6 @@
+essentia-tensorflow==2.1b6.dev1110
+psycopg2==2.9.9
+pydub==0.25.1
+pytaglib==3.0.0
+python-dotenv==1.0.1
+spotipy==2.24.0
