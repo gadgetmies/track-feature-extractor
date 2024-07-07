@@ -4,3 +4,6 @@ pydub==0.25.1
 pytaglib==3.0.0
 python-dotenv==1.0.1
 spotipy==2.24.0
+wavio==0.0.9
+scipy==1.14.0
+tabulate==0.9.0
