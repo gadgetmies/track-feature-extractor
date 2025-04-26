@@ -1,3 +1,4 @@
+essentia==2.1b6.dev1110
 essentia-tensorflow==2.1b6.dev1110
 psycopg2==2.9.9
 pydub==0.25.1
