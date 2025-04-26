@@ -1,3 +1,5 @@
+print("Initialising...")
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -108,7 +110,9 @@ def get_spotify_details(isrc):
 
 
 if __name__ == '__main__':
+    print("Loading config...")
     config = load_config()
+    print("Opening database connection...")
     conn = connect(config)
 
     tracksToProcess = []
