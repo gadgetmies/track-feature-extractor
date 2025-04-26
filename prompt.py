@@ -118,11 +118,11 @@ FROM track
 WHERE
   TO_TSVECTOR(
           'simple',
-          unaccent(track_title || ' ' ||
+          LOWER(unaccent(track_title || ' ' ||
                    COALESCE(track_title, '') || ' ' ||
                    COALESCE(track_artist, ' ') || ' ' ||
                    COALESCE(track_album, ' ') || ' ' ||
-                   COALESCE(track_label, ''))) @@
+                   COALESCE(track_label, '')))) @@
   websearch_to_tsquery('simple', unaccent('{query}'))
 LIMIT 20
             """)
@@ -162,21 +162,27 @@ def find_suitable_tracks(selected_track):
                 prev_num += 12
             suitable_keys = [f'{num}A', f'{num}B', f'{next_num}A', f'{next_num}B', f'{prev_num}A', f'{prev_num}B']
         try:
-            cur.execute(f"""
-WITH selected_track AS (
-    SELECT track_embedding_vector, track_artist 
-    FROM track_embedding NATURAL JOIN track 
-    WHERE track_id = %s AND track_embedding_type = 'multi'
-)
-SELECT track_id AS id, t.track_artist AS artist, track_title AS title, track_comment AS comment, track_bpm AS bpm, track_key AS key
-FROM track t NATURAL JOIN track_embedding te, selected_track
-WHERE
-    track_id <> %s
-    AND track_key = ANY(%s)
-    AND (%s IS NULL OR (ABS(1 - track_bpm / %s) < 0.1 OR ABS(1 - track_bpm * 2 / %s) < 0.1 OR ABS(1 - track_bpm / (%s * 2)) < 0.1))    AND t.track_artist <> selected_track.track_artist
-    AND track_release_date > to_date(%s::text, 'YYYY')
-ORDER BY
-    te.track_embedding_vector <-> selected_track.track_embedding_vector 
+            cur.execute(f"""WITH selected_track AS (SELECT track_embedding_vector, track_artist
+                        FROM track_embedding
+                                 NATURAL JOIN track
+                        WHERE track_id = %s
+                          AND track_embedding_type = 'multi')
+SELECT track_id       AS id,
+       t.track_artist AS artist,
+       track_title    AS title,
+       track_comment  AS comment,
+       track_bpm      AS bpm,
+       track_key      AS key
+FROM track t
+         NATURAL JOIN track_embedding te,
+     selected_track
+WHERE track_id <> %s
+  AND track_key = ANY (%s)
+  AND (%s IS NULL OR (track_bpm / %s BETWEEN 0.95 AND 1.05 OR track_bpm * 2 / %s BETWEEN 0.95 AND 1.05 OR
+                      track_bpm / %s * 2 BETWEEN 0.95 AND 1.05))
+  AND t.track_artist <> selected_track.track_artist
+  AND track_release_date > to_date(%s::text, 'YYYY')
+ORDER BY te.track_embedding_vector <-> selected_track.track_embedding_vector
 LIMIT 20
                     """, [selected_track[0], selected_track[0], suitable_keys, bpm, bpm, bpm, bpm, earliest_year])
             records = cur.fetchall()
@@ -221,7 +227,7 @@ SELECT track_id AS id, track_artist AS artist, track_title AS title, track_comme
 FROM track NATURAL JOIN track_embedding
 WHERE 
     track_key = ANY(%s)
-    AND (%s IS NULL OR (ABS(1 - track_bpm / %s) < 0.1 OR ABS(1 - track_bpm * 2 / %s) < 0.1 OR ABS(1 - track_bpm / (%s * 2)) < 0.1))
+    AND (%s IS NULL OR (ABS(1 - track_bpm / %s) > 0.95 OR ABS(1 - track_bpm * 2 / %s) > 0.95 OR ABS(1 - track_bpm / (%s * 2)) > 0.95))
     AND track_release_date > to_date(%s::text, 'YYYY')
 ORDER BY
     track_embedding_vector <-> '{embeddings.T.mean(1).tolist()}'
