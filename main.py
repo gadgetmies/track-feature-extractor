@@ -154,7 +154,7 @@ SELECT
             isrc = tags['isrc']
             if isrc != 'null':
                 print(f"Fetching Spotify audio features for ISRC: {isrc}")
-                spotify_details = get_spotify_details(isrc[1:-1])
+                #spotify_details = get_spotify_details(isrc[1:-1])
             # outputFile = NamedTemporaryFile()
             print("Converting mp3 to wav")
             sound = AudioSegment.from_mp3(absoluteFilePath)
