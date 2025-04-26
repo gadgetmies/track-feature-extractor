@@ -162,7 +162,7 @@ SELECT
             print("Preparing audio")
             audio = MonoLoader(filename='./output.wav', sampleRate=16000, resampleQuality=4)()
             print("Preparing model")
-            model = TensorflowPredictEffnetDiscogs(graphFilename=f"discogs_{args.model}_embeddings-effnet-bs64-1.pb",
+            model = TensorflowPredictEffnetDiscogs(graphFilename=f"models/discogs_{args.model}_embeddings-effnet-bs64-1.pb",
                                                    output="PartitionedCall:1")
             print("Processing audio")
             embeddings = model(audio)

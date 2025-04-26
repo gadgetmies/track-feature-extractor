@@ -1,6 +1,5 @@
 #! /usr/bin/env python
 
-import sys
 import shlex
 import sounddevice as sd
 import wavio as wv
@@ -207,7 +206,7 @@ def similarity_search():
     print("Preparing audio")
     audio = MonoLoader(filename='./output.wav', sampleRate=16000, resampleQuality=4)()
     print("Preparing model")
-    model = TensorflowPredictEffnetDiscogs(graphFilename=f"discogs_multi_embeddings-effnet-bs64-1.pb",
+    model = TensorflowPredictEffnetDiscogs(graphFilename=f"models/discogs_multi_embeddings-effnet-bs64-1.pb",
                                            output="PartitionedCall:1")
     print("Processing audio")
     embeddings = model(audio)
